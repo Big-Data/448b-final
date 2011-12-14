@@ -149,10 +149,12 @@ public class SQL {
 		base.setPassword("vis");
 //		base.setUrl("jdbc:mysql://127.0.0.1/vis?useServerPrepStmts=true");
 		base.setUrl("jdbc:mysql://127.0.0.1/vis");
-		if(TRACE_SQL)
-			cpds = new Log4jdbcProxyDataSource(base);
-		else
+		if(TRACE_SQL) {
+			Log4jdbcProxyDataSource logger = new Log4jdbcProxyDataSource(base);
+			cpds = logger;
+		} else {
 			cpds = base;
+		}
 	}
 
 	public static Connection open() {
