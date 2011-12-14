@@ -39,7 +39,7 @@ public class RequestLogFilter implements Filter {
 		
 		Date start = new Date();
 		
-		if(req.getContentType().equals("application/json")) {
+		if(req.getContentType() != null && req.getContentType().equals("application/json")) {
 			ServletInputStream s = req.getInputStream();
 			json = IOUtils.toString(s);
 			final String body = json;
