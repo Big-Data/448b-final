@@ -55,8 +55,8 @@ public class RequestLogFilter implements Filter {
 				}
 			};
 		}
-		if(json != null)
-			chain.doFilter(req, resp);
+
+		chain.doFilter(req, resp);
 		Date end = new Date();
 		try {
 			rla.logRequest(end.getTime() - start.getTime(), uri, json);
