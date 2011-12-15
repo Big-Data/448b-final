@@ -324,7 +324,12 @@
       return state;
     },
     pushStateToHash: function() {
-      return window.location.hash = encodeURIComponent(JSON.stringify(this.getState()));
+        var s = encodeURIComponent(JSON.stringify(this.getState()));
+        try {
+            history.replaceState(undefined, 'Sparc Entity Explorer', (window.location +"").split('#')[0] + '#' + s);
+        } catch(err) {
+        }
+        return s;
     },
     loadStateFromHash: function() {
       var state;

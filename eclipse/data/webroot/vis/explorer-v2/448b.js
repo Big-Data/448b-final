@@ -455,7 +455,10 @@ function queryChanged() {
 		return;
 
 	hashIgnore = true;
-	window.location.hash = encodeURIComponent(JSON.stringify(domStateToObject()));
+    try {
+        history.replaceState(undefined, 'News Explorer', (window.location +"").split('#')[0] + '#' + encodeURIComponent(JSON.stringify(domStateToObject())));
+    } catch(err) {
+    }
 	hashIgnore = false;
 
 	// will get called anytime the query gets changed in any way
