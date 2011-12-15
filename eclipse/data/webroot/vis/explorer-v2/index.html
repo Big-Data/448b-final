@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <script src="lib/jquery-1.7.1.min.js" type="text/javascript"></script>
@@ -30,7 +31,13 @@
 </head>
 <body>
 <div class="container_16">
-<h1 style="margin-bottom:3px">Newspaper Explorer</h1>
+<h1 style="margin-bottom:3px">Newspaper Explorer
+<span style="font-size:33%;">Showing the number of newspaper articles matching your query.</span>
+<div style="float:right;display:none" id="loading">
+    <img src="../d3-based/statics/images/roller.gif" id="js_sparkline_roller" class="js_roller" />            		
+</div>
+
+</h1>
   <div class="grid_16" id="series">
 	&nbsp;
   </div>

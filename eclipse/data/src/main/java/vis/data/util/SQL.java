@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 import net.sf.log4jdbc.Log4jdbcProxyDataSource;
 
 import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.DbUtils;
 
 import vis.data.model.annotations.Index;
 import vis.data.model.annotations.NonUniqueIndexes;
@@ -147,8 +148,8 @@ public class SQL {
 	static {
 		base.setUser("vis");
 		base.setPassword("vis");
-//		base.setUrl("jdbc:mysql://127.0.0.1/vis?useServerPrepStmts=true");
-		base.setUrl("jdbc:mysql://127.0.0.1/vis");
+		base.setUrl("jdbc:mysql://127.0.0.1/vis?useServerPrepStmts=true");
+//		base.setUrl("jdbc:mysql://127.0.0.1/vis");
 		if(TRACE_SQL) {
 			Log4jdbcProxyDataSource logger = new Log4jdbcProxyDataSource(base);
 			cpds = logger;
@@ -190,11 +191,7 @@ public class SQL {
 				Connection conn = tlc.get();
 				tlc.remove();
 				if(conn != null)
-					try {
-						conn.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+					DbUtils.closeQuietly(conn);
 			}
 		}
 

@@ -254,7 +254,7 @@ function Series() {
 		revert:"invalid",
 		handle: ".sGrip",
 		zIndex: 2700,
-		revertDuration: globalRevertDuration,
+		revertDuration: globalRevertDuration
 	});
 	return t;
 }
@@ -279,7 +279,7 @@ function Disjunction() {
 		handle: ".dGrip",
 		zIndex: 2700,
 		//helper: function() { return $(this).css("z-index",10000) },
-		revertDuration: globalRevertDuration,
+		revertDuration: globalRevertDuration
 	});
 	return t;
 }
@@ -298,7 +298,7 @@ $("#trash").droppable({
 	activeClass:"droppable",
 	hoverClass: "hover",
 	tolerance: "pointer",
-	greedy:true,
+	greedy:true
 })
 
 function seriesCount() {
@@ -320,7 +320,7 @@ function domStateToObject() {
 							});
 						})
 				}
-			}),
+			})
 	};
 	
 	$.each(viewModelContents, function(i,c) {
@@ -455,7 +455,10 @@ function queryChanged() {
 		return;
 
 	hashIgnore = true;
-	window.location.hash = encodeURIComponent(JSON.stringify(domStateToObject()));
+    try {
+        history.replaceState(undefined, 'News Explorer', (window.location +"").split('#')[0] + '#' + encodeURIComponent(JSON.stringify(domStateToObject())));
+    } catch(err) {
+    }
 	hashIgnore = false;
 
 	// will get called anytime the query gets changed in any way
@@ -464,9 +467,11 @@ function queryChanged() {
     if(query.series_.length == 0)
     	return;
     
+    $("#loading").css("display", "block");
     arbitraryQuery(viewModel.graphCountMode() ? "/api/query/winnerdocs/bucketed" :"/api/query/docs/bucketed",    
         query,
         function(gen,query,c,r,d){
+            $("#loading").css("display", "none");
             if(!success(c)) {
                 //alert("query failed to run: " + r);
                 //alert(JSON.stringify(query));

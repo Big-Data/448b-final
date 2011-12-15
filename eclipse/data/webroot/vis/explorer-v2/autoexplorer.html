@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <script src="lib/jquery-1.7.1.min.js" type="text/javascript"></script>
@@ -44,18 +45,49 @@
                 margin:0px;
             }
             .term-completes .ui-autocomplete {
-                min-width:660;
+                min-width:660px;
                 font-size:75%;
             }
             .query {
-                min-width:660;
+                min-width:660px;
             }
+            #query_holder>div:nth-of-type(1) .query {
+                background-color:#f8e7b3;
+            }
+            #query_holder>div:nth-of-type(2) .query {
+                background-color:#d3e9fb;
+            }
+            #query_holder>div:nth-of-type(3) .query {
+                background-color:#f25a5a;
+            }
+            #query_holder>div:nth-of-type(4) .query {
+                background-color:#9dcf9d;
+            }
+            #query_holder>div:nth-of-type(5) .query {
+                background-color:#d4b3f8;
+            }
+            #query_holder>div:nth-of-type(6) .query {
+                background-color:#bd9b35;
+            }
+            #query_holder>div:nth-of-type(7) .query {
+                background-color:#8cabc6;
+            }
+            #query_holder>div:nth-of-type(8) .query {
+                background-color:#dab1b1;
+            }
+           
 		</style>	
 
 </head>
 <body>
 <div class="container_16">
-<h1 style="margin-bottom:3px">Newspaper Explorer</h1>
+<h1 style="margin-bottom:3px">Newspaper Explorer
+<span style="font-size:33%;">Showing the number of newspaper articles matching your query.</span>
+<div style="float:right;display:none" id="loading">
+    <img src="../d3-based/statics/images/roller.gif" id="js_sparkline_roller" class="js_roller" />            		
+</div>
+
+</h1>
   <div id="query_holder"></div>
   <div class="grid_12" id="plot" style="height:400px;">&nbsp;</div>
   <div class="clear"></div>
@@ -70,18 +102,11 @@
 	  <fieldset><legend>Other options</legend><span class="graphOption" id="stacked">Stacked</span><span class="graphOption" id="countmode"><span class="hidewhenon">For Each</span><span class="hidewhenoff">Once</span></span></fieldset>
   </div>
   <div class="clear"></div>
-  <div class="grid_16">
-  <strong>Interesting graphs:</strong><br />
-  <a href="#%7B%22series%22%3A%5B%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22pakistan%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22afghanistan%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22iraq%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22north%20korea%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22iran%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%5D%2C%22startYear%22%3A2000%2C%22endYear%22%3A2010%2C%22horizontalAxis%22%3A%22date%22%2C%22dateGranularity%22%3A%22month%22%7D">
-  effect on 9/11 on coverage of selected countries</a><br />
-  <a href="#%7B%22series%22%3A%5B%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22soccer%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22basketball%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22football%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22baseball%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%2C%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22hockey%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%5D%2C%22startYear%22%3A2000%2C%22endYear%22%3A2010%2C%22horizontalAxis%22%3A%22date%22%2C%22dateGranularity%22%3A%22month%22%7D">
-  yearly sports seasons
-  </a><br />
-  <a href="#%7B%22series%22%3A%5B%7B%22contents%22%3A%5B%5B%7B%22text%22%3A%22the%22%2C%22type%22%3A%22default%22%7D%5D%5D%7D%5D%2C%22startYear%22%3A2000%2C%22endYear%22%3A2010%2C%22horizontalAxis%22%3A%22date%22%2C%22dateGranularity%22%3A%22month%22%7D">
-  "the" decline of american journalism
-  </a><br />
-  </div>
 
+</div>
+
+
+<div id="inspector_dialog" title="Headline Inspector">
 </div>
 
 
@@ -161,15 +186,20 @@ function queryChanged() {
         qs.push($(jqs[i]).attr("value"))
     }
 	hashIgnore = true;
-	window.location.hash = encodeURIComponent(JSON.stringify({graph:domStateToObject(),expr:qs}));
+    try {
+        history.replaceState(undefined, 'News Explorer', (window.location +"").split('#')[0] + '#' + encodeURIComponent(JSON.stringify({graph:domStateToObject(),expr:qs})));
+    } catch(err) {
+    }
 	hashIgnore = false;
 
 	// will get called anytime the query gets changed in any way
 	// we probably want to do some rate-limiting to avoid DoSing the server with queries
     var query = queryForTextArray(domStateToObject(), qs);
+    $("#loading").css("display", "block");
     arbitraryQuery(viewModel.graphCountMode() ? "/api/query/winnerdocs/bucketed" :"/api/query/docs/bucketed",    
         query,
         function(gen,query,c,r,d){
+            $("#loading").css("display", "none");
             if(!success(c)) {
                 //alert("query failed to run: " + r);
                 //alert(JSON.stringify(query));
