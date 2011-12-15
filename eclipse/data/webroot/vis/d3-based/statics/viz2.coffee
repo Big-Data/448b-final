@@ -68,7 +68,7 @@ Viz2 =
     @search = $('#js_search_box')
     @search.keyup (event) =>
       @loadData() if event.keyCode == 13
-    @loadStateFromHash()
+    @state = @loadStateFromHash()
     @loadData()
     
     $('#js_filter_entities').change => @loadRelatedData() if @mainSparkline
@@ -94,6 +94,8 @@ Viz2 =
       $( "#help-dialog" ).css("visibility", "visible")
       $( "#help-dialog" ).dialog( "open" )
       return false
+    checkHashFunc = () => location.reload(true) if @stateChanged()
+    setInterval(checkHashFunc, 1000)
     
   loadData: ->
     $('.js_roller').show()
@@ -227,7 +229,8 @@ Viz2 =
     return state
       
   pushStateToHash: ->
-    window.location.hash = encodeURIComponent(JSON.stringify(@getState()))
+    @state = @getState()
+    window.location.hash = encodeURIComponent(JSON.stringify(@state))
           
   loadStateFromHash: ->
     if window.location.hash != ""
@@ -238,8 +241,18 @@ Viz2 =
       @timeSpan = {}
       @timeSpan.start = new Date(state.start) if state.start
       @timeSpan.end = new Date(state.end) if state.end
+      return state
+    else
+      return {}
     
-    
+  stateChanged: ->
+    changed = false
+    hashState = JSON.parse(decodeURIComponent(window.location.hash.slice(1)))
+    for key, value of hashState
+      changed = true if value != @state[key]
+    return changed
+      
+        
       
 window.Viz2 = Viz2
     

@@ -101,6 +101,7 @@
   })();
   Viz2 = {
     init: function() {
+      var checkHashFunc;
       this.terms = [];
       this.search = $('#js_search_box');
       this.search.keyup(__bind(function(event) {
@@ -108,7 +109,7 @@
           return this.loadData();
         }
       }, this));
-      this.loadStateFromHash();
+      this.state = this.loadStateFromHash();
       this.loadData();
       $('#js_filter_entities').change(__bind(function() {
         if (this.mainSparkline) {
@@ -135,11 +136,17 @@
         show: "fade",
         hide: "fade"
       });
-      return $('.help-link').click(function() {
+      $('.help-link').click(function() {
         $("#help-dialog").css("visibility", "visible");
         $("#help-dialog").dialog("open");
         return false;
       });
+      checkHashFunc = __bind(function() {
+        if (this.stateChanged()) {
+          return location.reload(true);
+        }
+      }, this);
+      return setInterval(checkHashFunc, 1000);
     },
     loadData: function() {
       var term;
@@ -329,12 +336,8 @@
       return state;
     },
     pushStateToHash: function() {
-        var s = encodeURIComponent(JSON.stringify(this.getState()));
-        try {
-            history.replaceState(undefined, 'Sparc Entity Explorer', (window.location +"").split('#')[0] + '#' + s);
-        } catch(err) {
-        }
-        return s;
+      this.state = this.getState();
+      return window.location.hash = encodeURIComponent(JSON.stringify(this.state));
     },
     loadStateFromHash: function() {
       var state;
@@ -348,9 +351,24 @@
           this.timeSpan.start = new Date(state.start);
         }
         if (state.end) {
-          return this.timeSpan.end = new Date(state.end);
+          this.timeSpan.end = new Date(state.end);
+        }
+        return state;
+      } else {
+        return {};
+      }
+    },
+    stateChanged: function() {
+      var changed, hashState, key, value;
+      changed = false;
+      hashState = JSON.parse(decodeURIComponent(window.location.hash.slice(1)));
+      for (key in hashState) {
+        value = hashState[key];
+        if (value !== this.state[key]) {
+          changed = true;
         }
       }
+      return changed;
     }
   };
   window.Viz2 = Viz2;
