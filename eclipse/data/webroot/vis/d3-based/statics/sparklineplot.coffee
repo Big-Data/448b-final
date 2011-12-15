@@ -16,6 +16,7 @@ class SparklinePlot
     popup: false
     startDate: new Date(2000,0)
     endDate: new Date(2010, 11)
+    onClick: -> null
   
   constructor: (container, data, options = {}) ->
     @container = $(container)
@@ -27,10 +28,12 @@ class SparklinePlot
     @g = @vis.append("svg:g").attr("transform", "translate(0, #{@options.height})")
     @setData(data)
     @container.mousemove (evt) => 
-      @handleMouseover(evt) if @options.popup   
+      @handleMouseover(evt) if @options.popup
+    @container.click (evt) => 
+      @moreDetails(evt) if @options.popup
     $('body').mouseover (evt) =>
       @container.removeClass('hl_path')
-      PopupBox.hide()
+      PopupBox.hide()       
   
   setData: (@data) ->
     @xmax = d3.max(@data)
@@ -132,23 +135,31 @@ class SparklinePlot
         .attr("x2", xfn(0))
         .attr("y2", -1 * yfn(maxY))
         .attr("y2", -1 * yfn(maxY))
+  
+  moreDetails: (evt) ->
+    info = @getMousePosInfo(evt)
+    @options.onClick(info) if info.onTarget
         
   handleMouseover: (evt) ->
+    info = @getMousePosInfo(evt)
+    if info.onTarget
+      PopupBox.draw(evt.pageX, evt.pageY, DateFormatter.format(info.date), info.val)
+      @container.addClass('hl_path')
+    else
+      @container.removeClass('hl_path')
+      PopupBox.hide()
+  
+  getMousePosInfo: (evt) ->
     evt.preventDefault()
     evt.stopPropagation()
     offset = @container.offset()
-    relX = evt.pageX - offset.left
-    relY = evt.pageY - offset.top
-    if relX > @chartOffsetLeft() && relX < @chartOffsetLeft() + @chartWidth() && relY > @chartOffsetTop() && relY < @chartOffsetTop() + @chartHeight()
-      date = @getDateFromChartPos(relX - @chartOffsetLeft())
-      val = @getValueForDate(date)
-      realYPos = @options.height - @yScale(val)
-      if Math.abs(relY - realYPos) < 20
-        PopupBox.draw(evt.pageX, evt.pageY, DateFormatter.format(date), val)
-        @container.addClass('hl_path')
-      else
-        @container.removeClass('hl_path')
-        PopupBox.hide()
+    info = {relX: evt.pageX - offset.left, relY: evt.pageY - offset.top}
+    if info.relX > @chartOffsetLeft() && info.relX < @chartOffsetLeft() + @chartWidth() && info.relY > @chartOffsetTop() && info.relY < @chartOffsetTop() + @chartHeight()
+      info.date = @getDateFromChartPos(info.relX - @chartOffsetLeft())
+      info.val = @getValueForDate(info.date)
+      info.realYPos = @options.height - @yScale(info.val)
+      info.onTarget = Math.abs(info.relY - info.realYPos) < 20
+    return info
         
   chartWidth: ->
     return @options.width - 2 * @options.marginX

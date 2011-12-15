@@ -18,7 +18,10 @@
       yOffset: 0,
       popup: false,
       startDate: new Date(2000, 0),
-      endDate: new Date(2010, 11)
+      endDate: new Date(2010, 11),
+      onClick: function() {
+        return null;
+      }
     };
     function SparklinePlot(container, data, options) {
       if (options == null) {
@@ -32,6 +35,11 @@
       this.container.mousemove(__bind(function(evt) {
         if (this.options.popup) {
           return this.handleMouseover(evt);
+        }
+      }, this));
+      this.container.click(__bind(function(evt) {
+        if (this.options.popup) {
+          return this.moreDetails(evt);
         }
       }, this));
       $('body').mouseover(__bind(function(evt) {
@@ -121,25 +129,40 @@
       this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(maxX)).attr("y2", -1 * yfn(0));
       return this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(0)).attr("y2", -1 * yfn(maxY)).attr("y2", -1 * yfn(maxY));
     };
+    SparklinePlot.prototype.moreDetails = function(evt) {
+      var info;
+      info = this.getMousePosInfo(evt);
+      if (info.onTarget) {
+        return this.options.onClick(info);
+      }
+    };
     SparklinePlot.prototype.handleMouseover = function(evt) {
-      var date, offset, realYPos, relX, relY, val;
+      var info;
+      info = this.getMousePosInfo(evt);
+      if (info.onTarget) {
+        PopupBox.draw(evt.pageX, evt.pageY, DateFormatter.format(info.date), info.val);
+        return this.container.addClass('hl_path');
+      } else {
+        this.container.removeClass('hl_path');
+        return PopupBox.hide();
+      }
+    };
+    SparklinePlot.prototype.getMousePosInfo = function(evt) {
+      var info, offset;
       evt.preventDefault();
       evt.stopPropagation();
       offset = this.container.offset();
-      relX = evt.pageX - offset.left;
-      relY = evt.pageY - offset.top;
-      if (relX > this.chartOffsetLeft() && relX < this.chartOffsetLeft() + this.chartWidth() && relY > this.chartOffsetTop() && relY < this.chartOffsetTop() + this.chartHeight()) {
-        date = this.getDateFromChartPos(relX - this.chartOffsetLeft());
-        val = this.getValueForDate(date);
-        realYPos = this.options.height - this.yScale(val);
-        if (Math.abs(relY - realYPos) < 20) {
-          PopupBox.draw(evt.pageX, evt.pageY, DateFormatter.format(date), val);
-          return this.container.addClass('hl_path');
-        } else {
-          this.container.removeClass('hl_path');
-          return PopupBox.hide();
-        }
+      info = {
+        relX: evt.pageX - offset.left,
+        relY: evt.pageY - offset.top
+      };
+      if (info.relX > this.chartOffsetLeft() && info.relX < this.chartOffsetLeft() + this.chartWidth() && info.relY > this.chartOffsetTop() && info.relY < this.chartOffsetTop() + this.chartHeight()) {
+        info.date = this.getDateFromChartPos(info.relX - this.chartOffsetLeft());
+        info.val = this.getValueForDate(info.date);
+        info.realYPos = this.options.height - this.yScale(info.val);
+        info.onTarget = Math.abs(info.relY - info.realYPos) < 20;
       }
+      return info;
     };
     SparklinePlot.prototype.chartWidth = function() {
       return this.options.width - 2 * this.options.marginX;

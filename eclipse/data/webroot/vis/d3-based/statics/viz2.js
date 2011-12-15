@@ -127,6 +127,14 @@
         show: "fade",
         hide: "fade"
       });
+      $("#js_detail_popup").dialog({
+        autoOpen: false,
+        height: 300,
+        modal: true,
+        width: 400,
+        show: "fade",
+        hide: "fade"
+      });
       return $('.help-link').click(function() {
         $("#help-dialog").css("visibility", "visible");
         $("#help-dialog").dialog("open");
@@ -192,6 +200,18 @@
           }, this),
           onDragend: __bind(function(dateSpan) {
             return this.loadRelatedData();
+          }, this),
+          onClick: __bind(function(info) {
+            $('#js_article_time').text(DateFormatter.format(info.date));
+            $("#js_detail_popup").css("visibility", "visible");
+            $('#js_detail_popup').dialog("open");
+            return DatabaseInterface.articleDetails({
+              terms: this.term,
+              date: info.date,
+              callback: __bind(function(c, r, d) {
+                return this.setArticleDetails(r[0]);
+              }, this)
+            });
           }, this)
         });
       }
@@ -242,6 +262,19 @@
       this.term = term;
       this.search.val(this.term);
       return $('#js_current_term').text(this.term || 'All Articles');
+    },
+    setArticleDetails: function(articles) {
+      var article, list, _i, _len, _results;
+      list = $('#js_article_titles');
+      list.empty();
+      _results = [];
+      for (_i = 0, _len = articles.length; _i < _len; _i++) {
+        article = articles[_i];
+        _results.push($("<li />", {
+          text: article['title_']
+        }).appendTo(list));
+      }
+      return _results;
     },
     setListValues: function(ul, values, counts) {
       var count, currentUl, i, sparkline, value, _len, _results;
