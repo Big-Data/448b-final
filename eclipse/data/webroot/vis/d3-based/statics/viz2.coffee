@@ -156,9 +156,13 @@ Viz2 =
             date: info.date
             callback: (c,r,d) => @setArticleDetails(r[0])
       )
+      @mainSparkline.setDateRange(@timeSpan)
       
   loadTimeSpan: ->
-    @timeSpan = if @mainSparkline then @mainSparkline.getDateRange() else {}
+    if @mainSparkline 
+      @timeSpan = @mainSparkline.getDateRange() 
+    else 
+      @timeSpan ||= {}
       
   getEntityType: ->
     @filteringEntity = $('input[name=js_filter_entities]:checked').val()

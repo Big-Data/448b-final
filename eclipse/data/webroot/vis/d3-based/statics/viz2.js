@@ -186,7 +186,7 @@
       if (this.mainSparkline) {
         return this.mainSparkline.setData(results[0]);
       } else {
-        return this.mainSparkline = new EnhancedSparkline('#js_main_viz', results[0], {
+        this.mainSparkline = new EnhancedSparkline('#js_main_viz', results[0], {
           width: 700,
           height: 150,
           xOffset: 20,
@@ -214,10 +214,15 @@
             });
           }, this)
         });
+        return this.mainSparkline.setDateRange(this.timeSpan);
       }
     },
     loadTimeSpan: function() {
-      return this.timeSpan = this.mainSparkline ? this.mainSparkline.getDateRange() : {};
+      if (this.mainSparkline) {
+        return this.timeSpan = this.mainSparkline.getDateRange();
+      } else {
+        return this.timeSpan || (this.timeSpan = {});
+      }
     },
     getEntityType: function() {
       this.filteringEntity = $('input[name=js_filter_entities]:checked').val();
