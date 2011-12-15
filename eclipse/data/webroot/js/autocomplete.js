@@ -350,6 +350,9 @@ function autocompleteUpdate(ors, callback, code, response, duration) {
         return;
     }
     var top = response.slice(0,50);
+    if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ 
+        top = top.slice(0, 20);
+    }
     top.map(categorize);
     //top.sort(categorizedSort);
     top.sort(typeDependentSort);
