@@ -25,6 +25,16 @@ var DatabaseInterface = {
 		}, options || {}))
 	},
 	
+	articleDetails: function(options){
+		var series = this._getSeries(options.terms);
+		var year = options.date.getFullYear();
+		var month = options.date.getMonth();
+		var yearTerm = Query.MonthTerm(year, month);
+		series = [Query.AndTerm.apply(Query, series.concat(yearTerm))];
+		var queryParams = {series_: series, maxResults_: options.maxResults || 20};
+		Query.arbitraryQuery(Query.ARTICLE_DETAILS, queryParams, options.callback);
+	},
+	
 	query: function(options){
 		var buckets = this._getMonthBuckets(options.startDate, options.endDate);
 		var queryParams = { buckets_: buckets }
@@ -126,6 +136,7 @@ var Query = {
 	BUCKET_DOCS: "/api/query/docs/bucketed",
 	QUERY_LEMMAS: "/api/query/lemmas",
 	QUERY_ENTITIES: "/api/query/entities",
+	ARTICLE_DETAILS: "/api/query/details/one",
 	AUTOCOMPLETE_BASE: "/api/autocomplete/term/",
 	AUTOCOMPLETE_TYPE_LIST: "/api/autocomplete/types",
 	

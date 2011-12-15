@@ -161,9 +161,25 @@ li{
   color:white;
   font-weight:bold;
 }
+.overlay span{
+  padding: 3px;
+  display: block;
+  font-style:italic;
+  color:#777777;
+  margin-top:5px;
+}
 .overlay p{
   padding:2px;
   margin:0;
+}
+.detail_popup{
+  text-align: left;
+}
+.detail_popup ul{
+  padding-left:20px;
+}
+.detail_popup li{
+  list-style: disc;
 }
 path {
     stroke: green;
