@@ -60,7 +60,7 @@ PageTerm = function(begin_inclusive, end_exclusive) {
     return {page_:{begin_:begin_inclusive, end_:end_exclusive}};
 }
 SectionTerm = function(name) {
-    return {section_:{name_:name}};
+    return {section_:{section_:name}};
 }
 SentimentTerm = function(name) {
     return {sentiment_:{category_:name}};

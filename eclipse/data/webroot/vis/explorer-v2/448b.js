@@ -455,7 +455,10 @@ function queryChanged() {
 		return;
 
 	hashIgnore = true;
-	window.location.hash = encodeURIComponent(JSON.stringify(domStateToObject()));
+    try {
+        history.replaceState(undefined, 'News Explorer', (window.location +"").split('#')[0] + '#' + encodeURIComponent(JSON.stringify(domStateToObject())));
+    } catch(err) {
+    }
 	hashIgnore = false;
 
 	// will get called anytime the query gets changed in any way
@@ -464,9 +467,11 @@ function queryChanged() {
     if(query.series_.length == 0)
     	return;
     
+    $("#loading").css("display", "block");
     arbitraryQuery(viewModel.graphCountMode() ? "/api/query/winnerdocs/bucketed" :"/api/query/docs/bucketed",    
         query,
         function(gen,query,c,r,d){
+            $("#loading").css("display", "none");
             if(!success(c)) {
                 //alert("query failed to run: " + r);
                 //alert(JSON.stringify(query));

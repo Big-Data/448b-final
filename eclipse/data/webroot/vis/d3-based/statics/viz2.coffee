@@ -70,6 +70,7 @@ Viz2 =
       @loadData() if event.keyCode == 13
     @loadStateFromHash()
     @loadData()
+    
     $('#js_filter_entities').change => @loadRelatedData() if @mainSparkline
     $('#js_filter_newspapers').change => @loadData()
     
@@ -82,6 +83,13 @@ Viz2 =
       width: 600
       show: "fade"
       hide: "fade"
+    $("#js_detail_popup").dialog
+      autoOpen: false
+      height: 300
+      modal: true
+      width: 400
+      show: "fade"
+      hide: "fade" 
     $('.help-link').click ->
       $( "#help-dialog" ).css("visibility", "visible")
       $( "#help-dialog" ).dialog( "open" )
@@ -139,6 +147,14 @@ Viz2 =
           $('#js_date_start').html(DateFormatter.format(dateSpan.start))
           $('#js_date_end').html(DateFormatter.format(dateSpan.end))
         onDragend: (dateSpan) => @loadRelatedData()
+        onClick: (info) => 
+          $('#js_article_time').text(DateFormatter.format(info.date))
+          $("#js_detail_popup").css("visibility", "visible")
+          $('#js_detail_popup').dialog("open")
+          DatabaseInterface.articleDetails
+            terms: @term
+            date: info.date
+            callback: (c,r,d) => @setArticleDetails(r[0])
       )
       
   loadTimeSpan: ->
@@ -174,6 +190,12 @@ Viz2 =
   setTerm: (@term) ->
     @search.val(@term)
     $('#js_current_term').text(@term || 'All Articles')
+  
+  setArticleDetails: (articles) ->
+    list = $('#js_article_titles')
+    list.empty()
+    for article in articles
+      $("<li />", {text: article['title_']}).appendTo list
     
   setListValues: (ul, values, counts) ->
     currentUl = $(ul)

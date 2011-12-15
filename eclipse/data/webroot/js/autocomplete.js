@@ -77,14 +77,14 @@ function getOneTerm(before,after) {
     return undefined;
 }
 function getSingleWordTokens(text) {
-    var tokenize = /(?:,|\+|\(|\)|\s+|[a-zA-Z0-9.]+)/g;
+    var tokenize = /(?:,|\+|\(|\)|\s+|[a-zA-Z0-9.:]+)/g;
     var toks = text.match(tokenize);
     if(toks == null)
         return [];
     return toks;
 }
 function getTokens(text) {
-    var tokenize = /(?:,|\+|\(|\)|\s+|(?:[a-zA-Z0-9.]+(?:\s+[a-zA-Z0-9.]+)*))/g;
+    var tokenize = /(?:,|\+|\(|\)|\s+|(?:[a-zA-Z0-9.:]+(?:\s+[a-zA-Z0-9.:]+)*))/g;
     var toks = text.match(tokenize);
     if(toks == null)
         return [];
@@ -259,7 +259,24 @@ function handleTerminal(x) {
     //its possible we already converted it
     if(typeof x != "string")
         return x;
-    return OrTerm(EntityTerm(x), LemmaTerm(x));
+    var parts = x.split(/:/);
+    if(parts.length < 2) {
+        return OrTerm(EntityTerm(x), LemmaTerm(x));
+    } else if(parts[0] == "sentiment") {
+        return SentimentTerm(parts[1]);
+    } else if(parts[0] == "lemma") {
+        return LemmaTerm(parts[1]);
+    } else if(parts[0] == "entity") {
+        return EntityTerm(parts[1]);
+    } else if(parts[0] == "section") {
+        return SectionTerm(parts[1]);
+    } else if(parts[0] == "page") {
+        return PageTerm(parts[1]);
+    } else if(parts[0] == "pub") {
+        return PublicationTerm(parts[1]);
+    } else {
+        return LemmaTerm('wwijiboe');
+    }
 }
 function processTerms(terms) {
     if(terms.length == 0)
@@ -370,7 +387,7 @@ function autocompleteUpdate(ors, callback, code, response, duration) {
             return undefined;    
         already[word]=true;
         return {
-            label:"<input class='autocomplete-check'  id='" + id + "' alt='" + word + "' type='checkbox' " + checked + ">" +
+            label:"<input class='autocomplete-check'  id='" + id + "' alt='" + value + "' type='checkbox' " + checked + ">" +
                 "<label for='" + id + "'>" + 
                 word + " (" + x.score_ + ")" +
                 "</label>",
