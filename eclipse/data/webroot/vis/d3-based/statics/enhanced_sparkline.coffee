@@ -59,6 +59,16 @@ class EnhancedSparkline extends SparklinePlot
       @sliding = true
       @slideStartPos = evt.pageX
       @slideStartOffset = @selectorOffsetLeft
+  
+  setDateRange: (range) ->
+    if range and range.start and range.end
+      startDateNumber = @startDateNumber()
+      rangeStart = @dateToNumber(range.start)
+      rangeEnd = @dateToNumber(range.end)
+      maxSpan = @fullDateNumberSpan()
+      @selectorOffsetLeft = ((rangeStart - startDateNumber) / maxSpan) * @chartWidth()
+      @selectorWidth = ((rangeEnd - rangeStart) / maxSpan) * @chartWidth()
+      @rangeSelector.css({left: @chartOffsetLeft() + @selectorOffsetLeft + 'px', width: @selectorWidth + 'px'})
     
   updateSliding: (x) ->
     maxLeftOffset = @chartWidth() - @selectorWidth
