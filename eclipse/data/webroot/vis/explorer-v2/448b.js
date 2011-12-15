@@ -454,9 +454,12 @@ function queryChanged() {
 	if(ignoreQueryChange)
 		return;
 
+    var st = domStateToObject();
 	hashIgnore = true;
+
+	window.location.hash = encodeURIComponent(JSON.stringify(st));
     try {
-        history.replaceState(undefined, 'News Explorer', (window.location +"").split('#')[0] + '#' + encodeURIComponent(JSON.stringify(domStateToObject())));
+        history.replaceState(undefined, 'News Explorer', (window.location +"").split('#')[0] + '#' + encodeURIComponent(JSON.stringify(st)));
     } catch(err) {
     }
 	hashIgnore = false;

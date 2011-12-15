@@ -104,6 +104,21 @@
         return this.slideStartOffset = this.selectorOffsetLeft;
       }
     };
+    EnhancedSparkline.prototype.setDateRange = function(range) {
+      var maxSpan, rangeEnd, rangeStart, startDateNumber;
+      if (range && range.start && range.end) {
+        startDateNumber = this.startDateNumber();
+        rangeStart = this.dateToNumber(range.start);
+        rangeEnd = this.dateToNumber(range.end);
+        maxSpan = this.fullDateNumberSpan();
+        this.selectorOffsetLeft = ((rangeStart - startDateNumber) / maxSpan) * this.chartWidth();
+        this.selectorWidth = ((rangeEnd - rangeStart) / maxSpan) * this.chartWidth();
+        return this.rangeSelector.css({
+          left: this.chartOffsetLeft() + this.selectorOffsetLeft + 'px',
+          width: this.selectorWidth + 'px'
+        });
+      }
+    };
     EnhancedSparkline.prototype.updateSliding = function(x) {
       var delta, maxLeftOffset, newOffset;
       maxLeftOffset = this.chartWidth() - this.selectorWidth;
