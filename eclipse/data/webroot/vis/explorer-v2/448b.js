@@ -254,7 +254,7 @@ function Series() {
 		revert:"invalid",
 		handle: ".sGrip",
 		zIndex: 2700,
-		revertDuration: globalRevertDuration,
+		revertDuration: globalRevertDuration
 	});
 	return t;
 }
@@ -279,7 +279,7 @@ function Disjunction() {
 		handle: ".dGrip",
 		zIndex: 2700,
 		//helper: function() { return $(this).css("z-index",10000) },
-		revertDuration: globalRevertDuration,
+		revertDuration: globalRevertDuration
 	});
 	return t;
 }
@@ -298,7 +298,7 @@ $("#trash").droppable({
 	activeClass:"droppable",
 	hoverClass: "hover",
 	tolerance: "pointer",
-	greedy:true,
+	greedy:true
 })
 
 function seriesCount() {
@@ -320,7 +320,7 @@ function domStateToObject() {
 							});
 						})
 				}
-			}),
+			})
 	};
 	
 	$.each(viewModelContents, function(i,c) {
