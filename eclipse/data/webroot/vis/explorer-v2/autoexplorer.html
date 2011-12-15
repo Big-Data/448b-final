@@ -80,7 +80,11 @@
 </head>
 <body>
 <div class="container_16">
-<h1 style="margin-bottom:3px">Newspaper Explorer</h1>
+<h1 style="margin-bottom:3px">Newspaper Explorer
+<div style="float:right;display:none" id="loading">
+    <img src="../d3-based/statics/images/roller.gif" id="js_sparkline_roller" class="js_roller" />            		
+</div>
+</h1>
   <div id="query_holder"></div>
   <div class="grid_12" id="plot" style="height:400px;">&nbsp;</div>
   <div class="clear"></div>
@@ -185,9 +189,11 @@ function queryChanged() {
 	// will get called anytime the query gets changed in any way
 	// we probably want to do some rate-limiting to avoid DoSing the server with queries
     var query = queryForTextArray(domStateToObject(), qs);
+    $("#loading").css("display", "block");
     arbitraryQuery(viewModel.graphCountMode() ? "/api/query/winnerdocs/bucketed" :"/api/query/docs/bucketed",    
         query,
         function(gen,query,c,r,d){
+            $("#loading").css("display", "none");
             if(!success(c)) {
                 //alert("query failed to run: " + r);
                 //alert(JSON.stringify(query));

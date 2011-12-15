@@ -464,9 +464,11 @@ function queryChanged() {
     if(query.series_.length == 0)
     	return;
     
+    $("#loading").css("display", "block");
     arbitraryQuery(viewModel.graphCountMode() ? "/api/query/winnerdocs/bucketed" :"/api/query/docs/bucketed",    
         query,
         function(gen,query,c,r,d){
+            $("#loading").css("display", "none");
             if(!success(c)) {
                 //alert("query failed to run: " + r);
                 //alert(JSON.stringify(query));
