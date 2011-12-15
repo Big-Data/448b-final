@@ -457,7 +457,6 @@ function queryChanged() {
     var st = domStateToObject();
 	hashIgnore = true;
 
-	window.location.hash = encodeURIComponent(JSON.stringify(st));
     try {
         history.replaceState(undefined, 'News Explorer', (window.location +"").split('#')[0] + '#' + encodeURIComponent(JSON.stringify(st)));
     } catch(err) {
