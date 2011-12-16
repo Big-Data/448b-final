@@ -97,6 +97,13 @@ $.extend( proto, {
                         break;
                     }
                 }
+            } else {
+                switch( event.keyCode ) {
+                case keyCode.ENTER:
+                    self.options.requery();
+                    break;
+                default:
+                }
             }
             old_down.handler(event, ui);
         });

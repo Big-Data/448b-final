@@ -71,8 +71,12 @@ function getOneTerm(before,after) {
         }
     }
     for(var i = a.length - 1; i >= 0; --i) {
-        if(ok_word_expr.test(a[i]))
-            return a[i];
+        if(ok_word_expr.test(a[i])) {
+            var parts = a[i].split(/:/);
+            if(parts < 2 || parts[i].length == 0)
+                return a[i];
+            return parts[1];
+        }
     }
     return undefined;
 }
@@ -268,6 +272,8 @@ function handleTerminal(x) {
         return LemmaTerm(parts[1]);
     } else if(parts[0] == "entity") {
         return EntityTerm(parts[1]);
+    } else if(parts[0] == "title") {
+        return TitleTerm(parts[1]);
     } else if(parts[0] == "section") {
         return SectionTerm(parts[1]);
     } else if(parts[0] == "page") {
@@ -453,6 +459,10 @@ function createAutoComplete(jqs, onQueryChanged, start_at) {
             },
             revert:function() {
                 console.log("revert");
+            },
+            requery:function() {
+                console.log("requery");
+                onQueryChanged && onQueryChanged(jqs.attr("value"));
             },
         }
     );
