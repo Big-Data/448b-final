@@ -27,6 +27,7 @@ public class QueryExpression {
 	public SQLSectionTerm.Parameters section_;
 	public PageTerm.Parameters page_;
 	public SQLPublicationTerm.Parameters publication_;
+	public SQLTitleTerm.Parameters title_;
 	
 	//tag cloud queries - requires all full text queries to be filter only
 	//also these two are mutually exclusive
