@@ -1,0 +1,33 @@
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building data 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] >>> exec-maven-plugin:1.2.1:java (default-cli) @ data >>>
+[INFO] 
+[INFO] <<< exec-maven-plugin:1.2.1:java (default-cli) @ data <<<
+[INFO] 
+[INFO] --- exec-maven-plugin:1.2.1:java (default-cli) @ data ---
+2011-11-29 11:46:12.896:INFO:oejs.Server:jetty-8.0.4.v20111024
+2011-11-29 11:46:12.936:INFO:oejs.AbstractConnector:Started SelectChannelConnector@0.0.0.0:8181 STARTING
+Nov 29, 2011 11:46:44 AM com.sun.jersey.api.core.PackagesResourceConfig init
+INFO: Scanning for root resource and provider classes in the packages:
+  vis.data.server
+Nov 29, 2011 11:46:44 AM com.sun.jersey.api.core.ScanningResourceConfig logClasses
+INFO: Root resource classes found:
+  class vis.data.server.CNFQuery$TallyDocs
+  class vis.data.server.Status$ProtectedHeartBeat
+  class vis.data.server.Lemma$LemmasForPos
+  class vis.data.server.CNFQuery$TallyHits
+  class vis.data.server.Lemma$LemmasForWord
+  class vis.data.server.Status$HeartBeat
+  class vis.data.server.CNFQuery$FilterDocs
+  class vis.data.server.CNFQuery$EvaluateClauses
+  class vis.data.server.Lemma$LemmasForWordAndPos
+Nov 29, 2011 11:46:44 AM com.sun.jersey.api.core.ScanningResourceConfig init
+INFO: No provider classes found.
+Nov 29, 2011 11:46:44 AM com.sun.jersey.server.impl.application.WebApplicationImpl _initiate
+INFO: Initiating Jersey application, version 'Jersey: 1.10 11/02/2011 03:53 PM'
+Terminate batch job (Y/N)? 
+^C

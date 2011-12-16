@@ -73,7 +73,7 @@ function getOneTerm(before,after) {
     for(var i = a.length - 1; i >= 0; --i) {
         if(ok_word_expr.test(a[i])) {
             var parts = a[i].split(/:/);
-            if(parts < 2 || parts[1].length == 0)
+            if(parts.length < 2 || parts[1].length == 0)
                 return a[i];
             return parts[1];
         }
