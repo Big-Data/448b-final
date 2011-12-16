@@ -55,6 +55,7 @@ $.extend( proto, {
                         self.close();
                         return;
                     case keyCode.ENTER:
+                        suppress = true;
                     case keyCode.PLUS:
                     case keyCode.OPEN_BRACKET:
                     case keyCode.CLOSE_BRACKET:
@@ -82,6 +83,7 @@ $.extend( proto, {
                 } else {
                     switch( event.keyCode ) {
                     case keyCode.ENTER:
+                        suppress = true;
                         self.options.commit(self.term);
                         self.close();
                         break;
