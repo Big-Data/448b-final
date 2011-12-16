@@ -51,7 +51,7 @@ public abstract class SQLTerm extends Term {
 		}
 	}
 	protected static String clean(String query) {
-		return query.replaceAll("[A-Za-z0-9 ]+", "");
+		return query.replaceAll("[^A-Za-z0-9 ]+", "");
 	}
 
 	public Pair<int[], int[]> filter(int[] in_docs, int[] in_counts)
