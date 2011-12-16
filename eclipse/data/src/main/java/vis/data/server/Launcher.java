@@ -76,6 +76,7 @@ public class Launcher {
 		root.addServlet(sh, "/");
 		root.addServlet(sh, "/*");
 		//add static content path
+		root.addServlet(ssh, "/favicon.ico");
 		root.addServlet(ssh, "/index.html");
 		root.addServlet(ssh, "/images/*");
 		root.addServlet(ssh, "/html/*");
