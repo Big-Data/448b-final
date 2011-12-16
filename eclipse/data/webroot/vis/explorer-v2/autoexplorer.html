@@ -175,6 +175,16 @@ function queryForTextArray(state, text) {
 	} 
 	return query;
 }
+function rawQuery() {
+    var qs = [];
+    var jqs = $("#query_holder .query");
+    for(var i = 0; i < jqs.length; ++i) {
+        qs.push($(jqs[i]).attr("value"))
+    }
+    var st = domStateToObject();
+    var query = queryForTextArray(st, qs);
+    return query;
+}
 
 function queryChanged() {
 	if(ignoreQueryChange)
@@ -186,6 +196,7 @@ function queryChanged() {
         qs.push($(jqs[i]).attr("value"))
     }
     var st = domStateToObject();
+    var query = queryForTextArray(st, qs);
 	hashIgnore = true;
 
     try {

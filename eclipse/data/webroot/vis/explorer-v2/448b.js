@@ -687,11 +687,13 @@ function populateAutocomplete(gen, c, data) {
 }
 
 
-
+function rawQuery() {
+    return queryForObject(domStateToObject())
+}
 details_gen = 0;
 $("#plot").bind("plotclick", function (event, pos, item) {
 	if (item) {
-		var q = queryForObject(domStateToObject());
+		var q = rawQuery();
 		q.series_ = [AndTerm(q.series_[item.seriesIndex],q.buckets_[item.dataIndex])];
 		delete q.buckets_;
 		delete q.filter_;
