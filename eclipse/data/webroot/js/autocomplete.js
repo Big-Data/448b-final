@@ -273,11 +273,35 @@ function handleTerminal(x) {
         return EntityTerm(parts[1]);
     } else if(parts[0] == "title") {
         return TitleTerm(parts[1]);
+    } else if(parts[0] == "year") {
+        return YearTerm(parts[1]);
+    } else if(parts[0] == "dayofweek") {
+        if(/^su/i.test(parts[1]))
+            parts[1] = 1;
+        if(/^mo/i.test(parts[1]))
+            parts[1] = 2;
+        if(/^tu/i.test(parts[1]))
+            parts[1] = 3;
+        if(/^we/i.test(parts[1]))
+            parts[1] = 4;
+        if(/^th/i.test(parts[1]))
+            parts[1] = 5;
+        if(/^fi/i.test(parts[1]))
+            parts[1] = 6;
+        if(/^sa/i.test(parts[1]))
+            parts[1] = 7;
+        return DayOfWeekTerm(parts[1]);
     } else if(parts[0] == "section") {
         return SectionTerm(parts[1]);
     } else if(parts[0] == "page") {
         return PageTerm(parts[1]);
     } else if(parts[0] == "pub") {
+        if(/LA/i.test(parts[1]) || /time/i.test(parts[1]))
+            parts[1] = 7683;
+        if(/Ch/i.test(parts[1]) || /tri/i.test(parts[1]))
+            parts[1] = 7684;
+        if(/Ba/i.test(parts[1]) || /su/i.test(parts[1]))
+            parts[1] = 7556;
         return PublicationTerm(parts[1]);
     } else {
         return LemmaTerm('wwijiboe');

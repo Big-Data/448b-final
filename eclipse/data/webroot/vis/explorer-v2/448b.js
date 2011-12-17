@@ -565,7 +565,7 @@ viewModel._graphOptions = function() {
         if(viewModel.graphMode() != "bars") {
             retval.xaxis.min = 1;
 		} else {
-            retval.xaxis.min = .5;
+            retval.xaxis.min = 0.2;
         }
         retval.xaxis.max = 32;
         retval.series.bars.barWidth = 0.5;
