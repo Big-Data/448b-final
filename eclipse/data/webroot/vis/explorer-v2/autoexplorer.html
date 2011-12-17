@@ -77,6 +77,13 @@
             #query_holder>div:nth-of-type(8) .query {
                 background-color:#dab1b1;
             }
+            
+            #cloud {
+            }
+            .cloudtag {
+                padding:5px;
+                display:inline-block;
+            }
            
 		</style>	
 
@@ -124,7 +131,14 @@
     <li><a href="#%7B%22graph%22%3A%7B%22series%22%3A%5B%5D%2C%22horizontalAxis%22%3A%22month%22%2C%22graphStack%22%3Afalse%2C%22graphCountMode%22%3Atrue%2C%22graphMode%22%3A%22lines%22%2C%22startYear%22%3A2000%2C%22endYear%22%3A2010%7D%2C%22expr%22%3A%5B%22california%22%2C%22texas%22%5D%7D">california v texas</a>
     <li><a href="#%7B%22graph%22%3A%7B%22series%22%3A%5B%5D%2C%22horizontalAxis%22%3A%22dayofweek%22%2C%22graphStack%22%3Afalse%2C%22graphCountMode%22%3Atrue%2C%22graphMode%22%3A%22bars%22%2C%22startYear%22%3A2000%2C%22endYear%22%3A2010%7D%2C%22expr%22%3A%5B%22sentiment%3Apos%2Byear%3A2000%22%2C%22sentiment%3Aneg%2Byear%3A2000%22%2C%22sentiment%3Apos%2Byear%3A2010%22%2C%22sentiment%3Aneg%2Byear%3A2010%22%5D%7D">positive v negative sentiment by day of week for 2010 and 2000</a>
     <li><a href="#%7B%22graph%22%3A%7B%22series%22%3A%5B%5D%2C%22horizontalAxis%22%3A%22page%22%2C%22graphStack%22%3Afalse%2C%22graphCountMode%22%3Atrue%2C%22graphMode%22%3A%22bars%22%2C%22startYear%22%3A2000%2C%22endYear%22%3A2010%7D%2C%22expr%22%3A%5B%22sentiment%3Apos%22%2C%22sentiment%3Aneg%22%5D%7D">positive v negative sentiment by page number</a>
+    <li><a href="#%7B%22graph%22%3A%7B%22series%22%3A%5B%5D%2C%22horizontalAxis%22%3A%22month%22%2C%22graphStack%22%3Atrue%2C%22graphCountMode%22%3Atrue%2C%22graphMode%22%3A%22areas%22%2C%22startYear%22%3A2000%2C%22endYear%22%3A2010%7D%2C%22expr%22%3A%5B%22(section%3Aopinion%2Csection%3Aeditorial)%2Bpub%3Atimes%22%2C%22(section%3Aopinion%2Csection%3Aeditorial)%2Bpub%3Asun%22%2C%22(section%3Aopinion%2Csection%3Aeditorial)%2Bpub%3Atribune%22%5D%7D">opinion/editorial by publication</a>
     </ul>
+  </div>
+
+  <div style="display:none" class="grid_12" id="cloud" style="height:600px;">
+    <div style="float:right;display:none" id="cloudloading">
+        <img src="../d3-based/statics/images/roller.gif" id="js_sparkline_roller" class="js_roller" />            		
+    </div>
   </div>
 
 </div>
@@ -151,7 +165,11 @@
     
     <div id="query_template">
       <div class="grid-autocomplete ui-widget">
-        <span>Query:</span><input type="text" class="query"><button class="series-remove">Remove</button><button class="series-add">Add</button>
+        <span>Query:</span>
+        <input type="text" class="query">
+        <button class="series-remove">Remove</button>
+        <button class="series-add">Add</button>
+        <button class="series-cloud">Cloud</button>
         <div class="term-completes"></div>
       </div>
     </div>
@@ -166,20 +184,34 @@
 <script>
 function queryForTextArray(state, text) {
 	var query = {};
-	var AndHelper = function(arr) { return arr.length > 1 ? {and_:{terms_: arr }} : arr[0]; };
-	var OrHelper = function(arr) { return arr.length > 1 ? {or_:{terms_: arr }} : arr[0]; };
-	var WordToTerm = LemmaTerm;
 	
-	WordToTerm = function(a) { return OrTerm(LemmaTerm(a), EntityTerm(a)); };
-
-	
-	query.filter_ = {date_:{before_:(state.endYear+1)*10000, after_:(state.startYear*10000 - 1)}};
+	query.filter_ = DateSpanTerm(state.startYear, 0, state.endYear + 1, 0);
 	
 	query.series_ = text
 		.map(function(x) {
 			return buildExpression(x);
 		});
 	handleBuckets(query, state);
+	return query;
+}
+function cloudQueryForText(state, text, term_function, filter_function) {
+    if(undefined === filter_function) {
+        filter_function = function(x) {return x};
+    }
+	var query = {
+        series_:[
+            filter_function(
+                term_function(
+                    AndTerm(
+                        DateSpanTerm(state.startYear, 0, state.endYear + 1, 0), 
+                        buildExpression(text)
+                    )
+                )
+            )
+		],
+        maxResults_:200,
+        includeText_:true
+    };
 	return query;
 }
 function rawQuery() {
@@ -251,13 +283,58 @@ function seriesCount() {
 }
 function removeSeries(qt) {
     if($("#query_holder .query").length == 1) {
-        qt.attr("value","");
+        $(".query", qt).attr("value","");
     } else {
         qt.remove();
     }
     queryChanged();
 }
-
+var tag_gen = 0;
+function tagCloud(qt) {
+    var st = domStateToObject();
+    var query = cloudQueryForText(st, $(".query", qt).attr("value"), DocLemmaTerm);
+    query.series_ = query.series_.map(function(x){ return AndTerm(x, PosPrefixTerm('N')); });
+    $("#cloud").children().remove();
+    $("#loading").clone().attr("id", "cloudloading").appendTo($("#cloud"));
+    $( "#cloud" ).dialog({
+            height:600,
+            width:800,
+			modal: true
+		});
+        
+    $("#cloudloading").css("display", "block");
+    arbitraryQuery("/api/query/lemmas",    
+        query,
+        function(gen,query,c,r,d){
+            $("#cloudloading").css("display", "none");
+            if(!success(c)) {
+                //alert("query failed to run: " + r);
+                //alert(JSON.stringify(query));
+                return;
+            }
+            if(gen != tag_gen)
+                return;
+                
+            var c = $("#cloud");
+            var max = Math.max.apply(undefined, r[0].count_);
+            var order = [];
+            var left = array_range(0, r[0].count_.length - 1);
+            while(left.length > 0) {
+                var i = Math.floor(Math.random()*left.length);
+                order.push(left[i])
+                var subst = left.pop();
+                if(i < left.length)
+                    left[i] = subst;
+            }
+            for(var i = 0; i < r[0].lemma_.length; ++i) {
+                var pct = 33 + 366 * r[0].count_[order[i]] / max;
+                $("<div class='cloudtag' style='font-size:" + pct + "%'>" + r[0].lemma_[order[i]] + "</div>").appendTo(c);
+            }
+                
+            
+        }.bind(this, ++tag_gen, query)
+    );
+}
 function addSeries(q, wait) {
     var qt = $("#query_template").clone().attr("id", null).appendTo($("#query_holder"));
     var nq = $(".query", qt);
@@ -282,6 +359,15 @@ function addSeries(q, wait) {
         }
     );
     add.click(addSeries.bind(undefined, undefined, undefined));
+    var cloud = $(".series-cloud", qt).button(
+        {
+            icons: {
+                primary: "ui-icon-shuffle"
+            },
+            text: false
+        }
+    );
+    cloud.click(tagCloud.bind(undefined, qt));
     if(!wait)
         queryChanged();
     return nq;
