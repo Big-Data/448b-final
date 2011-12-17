@@ -80,6 +80,21 @@
             
             #cloud {
             }
+            .tag-n {
+                color:#8dd3c7;
+            }
+            .tag-v {
+                color:#ffffb3;
+            }
+            .tag-organization {
+                color:#bebada;
+            }
+            .tag-person {
+                color:#fb8072;
+            }
+            .tag-location {
+                color:#80b1d3;
+            }
             .cloudtag {
                 padding:5px;
                 display:inline-block;
@@ -209,7 +224,7 @@ function cloudQueryForText(state, text, term_function, filter_function) {
                 )
             )
 		],
-        maxResults_:200,
+        maxResults_:75,
         includeText_:true
     };
 	return query;
@@ -289,24 +304,66 @@ function removeSeries(qt) {
     }
     queryChanged();
 }
+function genCloud(res) {
+    var c = $("#cloud");
+    $("#cloudloading").css("display", "none");
+    c.css("background-color","#3c3c3c");
+    
+    delete res['v:be'];
+    delete res['v:have'];
+    
+    var all = [];
+    var max = 0;
+    for(var t in res) {
+        all.push(res[t]);
+        if(res[t] > max)
+            max = res[t];
+    }
+    all.sort();
+    var median = all[Math.floor(all.length / 2)];
+    var upper = all[Math.floor(3 * all.length / 4)];
+
+    var order = [];
+    for(var t in res) {
+        order.push({key:t, value:res[t]});
+    }
+    
+    //score order
+    order.sort(function(a,b) { if(a.value < b.value) return 1; if(a.value > b.value) return -1; return 0;});
+    
+    for(var i in order) {
+        var pct = 40 + 80 * order[i].value / median;
+        if(pct > 120) {
+            pct = 120 + 180 * (order[i].value - median) / (max - median);
+        }
+        $("<div class='cloudtag tag-" + order[i].key.split(/:/)[0].toLowerCase() + "' style='font-size:" + pct + "%'>" + order[i].key.split(/:/)[1] + "</div> ").appendTo(c);
+    }
+}
 var tag_gen = 0;
 function tagCloud(qt) {
+    var text = $(".query", qt).attr("value");
     var st = domStateToObject();
-    var query = cloudQueryForText(st, $(".query", qt).attr("value"), DocLemmaTerm);
+    var query = cloudQueryForText(st, text, DocLemmaTerm);
     query.series_ = query.series_.map(function(x){ return AndTerm(x, PosPrefixTerm('N')); });
     $("#cloud").children().remove();
     $("#loading").clone().attr("id", "cloudloading").appendTo($("#cloud"));
     $( "#cloud" ).dialog({
             height:600,
             width:800,
-			modal: true
-		});
+			modal: true,
+            title:"Tag Cloud for " + text
+		}
+    ).bind( "dialogclose", function(event, ui) {
+        $("#cloud").css("background-color", "inherit");
+    });
         
     $("#cloudloading").css("display", "block");
+    var res = {};
+    var remaining = 3;
+    ++tag_gen;
     arbitraryQuery("/api/query/lemmas",    
         query,
         function(gen,query,c,r,d){
-            $("#cloudloading").css("display", "none");
             if(!success(c)) {
                 //alert("query failed to run: " + r);
                 //alert(JSON.stringify(query));
@@ -315,24 +372,66 @@ function tagCloud(qt) {
             if(gen != tag_gen)
                 return;
                 
-            var c = $("#cloud");
-            var max = Math.max.apply(undefined, r[0].count_);
-            var order = [];
-            var left = array_range(0, r[0].count_.length - 1);
-            while(left.length > 0) {
-                var i = Math.floor(Math.random()*left.length);
-                order.push(left[i])
-                var subst = left.pop();
-                if(i < left.length)
-                    left[i] = subst;
-            }
             for(var i = 0; i < r[0].lemma_.length; ++i) {
-                var pct = 33 + 366 * r[0].count_[order[i]] / max;
-                $("<div class='cloudtag' style='font-size:" + pct + "%'>" + r[0].lemma_[order[i]] + "</div>").appendTo(c);
+                var id = "n:" +  r[0].lemma_[i];
+                if(id in res) {
+                    res[id] += r[0].count_[i];
+                } else {
+                    res[id] = r[0].count_[i];
+                }
             }
+            if(--remaining == 0)
+                genCloud(res);
+        }.bind(this, tag_gen, query)
+    );
+    query = cloudQueryForText(st, $(".query", qt).attr("value"), DocLemmaTerm);
+    query.series_ = query.series_.map(function(x){ return AndTerm(x, PosPrefixTerm('V')); });
+    arbitraryQuery("/api/query/lemmas",    
+        query,
+        function(gen,query,c,r,d){
+            if(!success(c)) {
+                //alert("query failed to run: " + r);
+                //alert(JSON.stringify(query));
+                return;
+            }
+            if(gen != tag_gen)
+                return;
                 
-            
-        }.bind(this, ++tag_gen, query)
+            for(var i = 0; i < r[0].lemma_.length; ++i) {
+                var id = "v:" +  r[0].lemma_[i];
+                if(id in res) {
+                    res[id] += r[0].count_[i];
+                } else {
+                    res[id] = r[0].count_[i];
+                }
+            }
+            if(--remaining == 0)
+                genCloud(res);
+        }.bind(this, tag_gen, query)
+    );
+    query = cloudQueryForText(st, $(".query", qt).attr("value"), DocEntityTerm);
+    arbitraryQuery("/api/query/entities",    
+        query,
+        function(gen,query,c,r,d){
+            if(!success(c)) {
+                //alert("query failed to run: " + r);
+                //alert(JSON.stringify(query));
+                return;
+            }
+            if(gen != tag_gen)
+                return;
+                
+            for(var i = 0; i < r[0].entity_.length; ++i) {
+                var id = r[0].type_[i] + ":" +  r[0].entity_[i];
+                if(id in res) {
+                    res[id] += r[0].count_[i];
+                } else {
+                    res[id] = r[0].count_[i];
+                }
+            }
+            if(--remaining == 0)
+                genCloud(res);
+        }.bind(this, tag_gen, query)
     );
 }
 function addSeries(q, wait) {
