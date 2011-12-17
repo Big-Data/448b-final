@@ -39,6 +39,9 @@ YearTerm = function(year) {
 MonthTerm = function(year, month) {
     return {date_:{before_:(year)*10000+(month+2)*100, after_:(year*10000)+(month+1)*100}};
 }
+DayOfWeekTerm = function(day_number) {
+    return {dayOfWeek_:{dayOfWeek_:day_number}};
+}
 function dateForWeek(year,week) {
     var base = new Date(year, 0, 1);
     return new Date(base.getTime() + week * 86400 * 1000 * 365 / 52);

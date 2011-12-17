@@ -24,6 +24,7 @@ public class QueryExpression {
 	
 	//meta data queries - filter only
 	public DateTerm.Parameters date_;
+	public DayOfWeekTerm.Parameters dayOfWeek_;
 	public SQLSectionTerm.Parameters section_;
 	public PageTerm.Parameters page_;
 	public SQLPublicationTerm.Parameters publication_;

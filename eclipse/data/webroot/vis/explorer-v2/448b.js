@@ -76,7 +76,7 @@ viewModel.horizontalAxis = function(data) {
 $("#stacked").click(function() { viewModel.graphStack(!$(this).hasClass("selected")); });
 $("#countmode").click(function() { viewModel.graphCountMode(!$(this).hasClass("selected")); });
 $("#bars,#lines,#areas").click(function() { viewModel.graphMode($(this).attr("id")); });
-$("#week,#month,#year,#page").click(function() { viewModel.horizontalAxis($(this).attr("id")); });
+$("#week,#dayofweek,#month,#year,#page").click(function() { viewModel.horizontalAxis($(this).attr("id")); });
 
 
 
@@ -421,7 +421,10 @@ function handleBuckets(query, state) {
 		}).reduce(function(m,n) {
 			return m.concat(n);
 		});
-	} 
+	} else if (state.horizontalAxis == "dayofweek") {
+		query.buckets_ = array_range(1,7).map(function(a) {
+			return DayOfWeekTerm(a);
+		});	} 
 }
 function queryForObject(state) {
 	var query = {};
@@ -497,6 +500,15 @@ function handlePlotData(r) {
                     return [dateForWeek(viewModel.startYear(),y_i, 3.5).getTime(),y];
                 }), label: labels[x_i]  };
             }));
+    } else if(viewModel.horizontalAxis() == "dayofweek") {
+        viewModel._graphData(
+            r
+            .map(function(x, x_i) {
+                
+                return {data: x.map(function(y,y_i) {
+                    return [y_i + 0.5,y];
+                }), label: labels[x_i]};
+            }));
     }
 }
 
@@ -556,6 +568,17 @@ viewModel._graphOptions = function() {
             retval.xaxis.min = .5;
         }
         retval.xaxis.max = 32;
+        retval.series.bars.barWidth = 0.5;
+    } else if(viewModel.horizontalAxis() == "dayofweek") {
+    	retval.xaxis.mode = null;
+        retval.xaxis.ticks = [[1,'Sunday'],[2,'Monday'],[3,'Tuesday'],[4,'Wednesday'],[5,'Thursday'],[6,'Friday'],[7,'Saturday']].map(function(x){ return [x[0] - .5, x[1]];});
+        if(viewModel.graphMode() != "bars") {
+            retval.xaxis.min = 0.5;
+            retval.xaxis.max = 6.5;
+		} else {
+            retval.xaxis.min = 0;
+            retval.xaxis.max = 7;
+        }
         retval.series.bars.barWidth = 0.5;
     } else if(viewModel.horizontalAxis() == "year" || viewModel.horizontalAxis() == "month" || viewModel.horizontalAxis() == "week" ) {
     	retval.xaxis.mode = "time";
