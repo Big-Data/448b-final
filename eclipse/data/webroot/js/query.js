@@ -39,6 +39,19 @@ YearTerm = function(year) {
 MonthTerm = function(year, month) {
     return {date_:{before_:(year)*10000+(month+2)*100, after_:(year*10000)+(month+1)*100}};
 }
+function dateForWeek(year,week) {
+    var base = new Date(year, 0, 1);
+    return new Date(base.getTime() + week * 86400 * 1000 * 365 / 52);
+}
+WeekTerm = function(year, week) {
+    var base = new Date(year, 0, 1);
+    var from = new Date(base.getTime() + week * 86400 * 1000 * 365 / 52);
+    var to = new Date(base.getTime() + (week + 1) * 86400 * 1000 * 365 / 52);
+    return {date_:{
+        after_:(from.getFullYear())*10000+(from.getMonth()+1)*100+from.getDate(), 
+        before_:(to.getFullYear())*10000+(to.getMonth()+1)*100+to.getDate()
+    }};
+}
 OrTerm = function() {
     var terms = [];
     for(var i = 0; i < arguments.length; ++i) {

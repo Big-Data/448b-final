@@ -56,7 +56,7 @@
 	border-color:red !important;
 }
 
-#bars, #lines, #areas, #year, #month, #page, #stacked, #countmode {
+#bars, #lines, #areas, #year, #month, #week, #page, #stacked, #countmode {
 	background-repeat:no-repeat;
 	background-position:2px 2px;
 	padding-top:52px;
@@ -68,7 +68,7 @@
 	background-color:white;
 }
 
-#year, #month, #page, #stacked, #countmode {
+#year, #month, #week, #page, #stacked, #countmode {
 	background-size:50px 50px;
 }
 #countmode  {
@@ -92,6 +92,9 @@
 
 #month {
 	background-image:url("img/cal.png");
+}
+#week {
+	background-image:url("img/wcal.png");
 }
 
 #page {
