@@ -1,7 +1,6 @@
 package vis.data.model.meta;
 
 import java.nio.ByteBuffer;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -83,9 +82,13 @@ public abstract class BaseHitsAccessor {
 		return Pair.of(items, counts);
 	}
 	static final int COUNT_TRADEOFF = 8192;
+	static final int CHUNK_SIZE = 8192;
 	public Pair<int[], int[]> getCounts(int docs[]) throws SQLException {
 		if(docs.length == 0)
 			return Pair.of(new int[0], new int[0]);
+		if(docs.length > CHUNK_SIZE) {
+			return getCountsLarge(docs);
+		}
 		StringBuilder sb = new StringBuilder(docs.length * 16);
 		sb.append(bulkCountsQueryBase());
 		sb.append("(");
@@ -95,41 +98,61 @@ public abstract class BaseHitsAccessor {
 			sb.append(docs[i]);
 		}
 		sb.append(")");
-		Connection conn = SQL.open();
+		Statement st = SQL.forThread().createStatement();
+		ResultSet rs = st.executeQuery(sb.toString());
 		try {
-			Statement st = conn.createStatement();
-			st.setFetchSize(Integer.MIN_VALUE);
+			if(!rs.next())
+				return Pair.of(new int[0], new int[0]);
+			Pair<int[], int[]> partial = processRow(rs);
+			Pair<int[], int[]> res;
+			while(rs.next()) {
+				res = processRow(rs);
+				if(res.getKey().length > COUNT_TRADEOFF || partial.getKey().length > COUNT_TRADEOFF)
+					break;
+				partial = CountAggregator.or(res.getKey(), res.getValue(), partial.getKey(), partial.getValue());
+			}
+	
+			//bail if we finished in short mode
+			if(rs.isAfterLast()) {
+				return partial;
+			}		
+			int[] all = new int[maxItemId() + 1];
+			explodeItems(all, partial.getKey(), partial.getValue());
+			while(rs.next()) {
+				res = processRow(rs);
+				explodeItems(all, res.getKey(), res.getValue());
+			}
+			return squishItems(all);
+		} finally {
+			rs.close();
+			st.close();
+		}
+	}
+	private Pair<int[], int[]> getCountsLarge(int docs[]) throws SQLException {
+		int[] all = new int[maxItemId() + 1];
+		for(int i = 0; i < docs.length;) {
+			StringBuilder sb = new StringBuilder(docs.length * 16);
+			sb.append(bulkCountsQueryBase());
+			sb.append("(");
+			sb.append(docs[i++]);
+			for(int j = 0; j < CHUNK_SIZE && i < docs.length; ++i, ++j) {
+				sb.append(",");
+				sb.append(docs[i]);
+			}
+			sb.append(")");
+			Statement st = SQL.forThread().createStatement();
 			ResultSet rs = st.executeQuery(sb.toString());
 			try {
-				if(!rs.next())
-					return Pair.of(new int[0], new int[0]);
-				Pair<int[], int[]> partial = processRow(rs);
-				Pair<int[], int[]> res;
 				while(rs.next()) {
-					res = processRow(rs);
-					if(res.getKey().length > COUNT_TRADEOFF || partial.getKey().length > COUNT_TRADEOFF)
-						break;
-					partial = CountAggregator.or(res.getKey(), res.getValue(), partial.getKey(), partial.getValue());
-				}
-		
-				//bail if we finished in short mode
-				if(rs.isAfterLast()) {
-					return partial;
-				}		
-				int[] all = new int[maxItemId() + 1];
-				explodeItems(all, partial.getKey(), partial.getValue());
-				while(rs.next()) {
-					res = processRow(rs);
+					Pair<int[], int[]> res = processRow(rs);
 					explodeItems(all, res.getKey(), res.getValue());
 				}
-				return squishItems(all);
 			} finally {
 				rs.close();
 				st.close();
 			}
-		} finally {
-			conn.close();
 		}
+		return squishItems(all);
 	}
 	public int updateHitList(int item, int items[], int counts[]) throws SQLException {
 		PreparedStatement st =updateQuery();
