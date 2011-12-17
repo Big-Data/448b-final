@@ -56,7 +56,7 @@ function typeDependentSort(a,b) {
     }
 }
 function atBeginningOfTerm(s) {
-    return /(?:^|[,+\(\)\s])\s*$/.test(s);
+    return /(?:^|[,+!\(\)\s])\s*$/.test(s);
 }
 function getOneTerm(before,after) {
     var a = getSingleWordTokens(before);
@@ -81,20 +81,20 @@ function getOneTerm(before,after) {
     return undefined;
 }
 function getSingleWordTokens(text) {
-    var tokenize = /(?:,|\+|\(|\)|\s+|[a-zA-Z0-9.:]+)/g;
+    var tokenize = /(?:,|!|\+|\(|\)|\s+|[a-zA-Z0-9.:]+)/g;
     var toks = text.match(tokenize);
     if(toks == null)
         return [];
     return toks;
 }
 function getTokens(text) {
-    var tokenize = /(?:,|\+|\(|\)|\s+|(?:[a-zA-Z0-9.:]+(?:\s+[a-zA-Z0-9.:]+)*))/g;
+    var tokenize = /(?:,|!|\+|\(|\)|\s+|(?:[a-zA-Z0-9.:]+(?:\s+[a-zA-Z0-9.:]+)*))/g;
     var toks = text.match(tokenize);
     if(toks == null)
         return [];
     return toks;
 }
-var word_expr = /[^,+\(\)\s]+/;
+var word_expr = /[^,!+\(\)\s]+/;
 function getAllTokens(before,after) {
     var a = getTokens(before);
     var b = getTokens(after);
@@ -110,10 +110,9 @@ function getAllTokens(before,after) {
     a.push.apply(a, b);
     return a;
 }
-var ok_or_expr = /[^+\(\)]+/;
-var ok_and_expr = /[^,\(\)]+/;
-var ok_word_expr = /[^,+\(\)]+/;
-var ok_word_expr = /[^,+\(\)]+/;
+var ok_or_expr = /[^+!\(\)]+/;
+var ok_and_expr = /[^,!\(\)]+/;
+var ok_word_expr = /[^,!+\(\)]+/;
 function extractOrList(before,after) {
     var a = getTokens(before);
     var b = getTokens(after);
@@ -304,6 +303,8 @@ function processTerms(terms) {
         } else if(ok_word_expr.test(term)) {
             //plain word, just add it
             parts.push(term);
+        } else if(term == '!') {
+            parts.push(NotTerm(processTerms(terms)));
         } else if(term == ',' || term == '+') {
             if(undefined === type) {
                 type = term;
