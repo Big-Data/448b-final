@@ -534,7 +534,6 @@ function queryChanged() {
     arbitraryQuery(viewModel.graphCountMode() ? "/api/query/winnerdocs/bucketed" :"/api/query/docs/bucketed",    
         query,
         function(gen,query,c,r,d){
-            $("#loading").css("display", "none");
             if(!success(c)) {
                 //alert("query failed to run: " + r);
                 //alert(JSON.stringify(query));
@@ -542,6 +541,7 @@ function queryChanged() {
             }
             if(gen != current_generation)
                 return;
+            $("#loading").css("display", "none");
             handlePlotData(r);
         }.bind(this, ++current_generation, query));
 }
