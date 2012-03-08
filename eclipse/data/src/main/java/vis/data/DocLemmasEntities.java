@@ -48,6 +48,10 @@ public class DocLemmasEntities {
 		
 		Connection conn = SQL.forThread();
 
+		try {
+			SQL.createTable(conn, DocLemma.class);
+		} catch (SQLException e) {}
+
 		//first load all the document ids that are unprocesssed
 		final int[] all_processed_doc_ids = IdListAccessor.allProcessedDocs();
 		Arrays.sort(all_processed_doc_ids);
@@ -57,11 +61,6 @@ public class DocLemmasEntities {
 		
 		//final int[] all_doc_ids = ArrayUtils.subarray(IdLists.allDocs(conn), 0, 1000);
 		
-		if(all_processed_doc_ids.length == 0) try {
-			SQL.createTable(conn, DocLemma.class);
-		} catch (SQLException e) {
-			throw new RuntimeException("failed to create table of words for documents", e);
-		}
 
 		final BlockingQueue<RawDoc> doc_to_process = new ArrayBlockingQueue<RawDoc>(100);
 		//thread to scan for documents to process
