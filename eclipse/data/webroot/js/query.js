@@ -34,10 +34,19 @@ EntityTerm = function(entity) {
     return {entity_:{entity_:entity}};
 }
 YearTerm = function(year) {
+    if(typeof year == "string") {
+        year = parseInt(year);
+    }
     return {date_:{before_:(year+1)*10000, after_:(year*10000 - 1)}};
+}
+DateSpanTerm = function(year1, month1, year2, month2){
+    return {date_:{before_:(year2)*10000+(month2+2)*100, after_:(year1*10000)+(month1+1)*100}};
 }
 MonthTerm = function(year, month) {
     return {date_:{before_:(year)*10000+(month+2)*100, after_:(year*10000)+(month+1)*100}};
+}
+DayOfWeekTerm = function(day_number) {
+    return {dayOfWeek_:{dayOfWeek_:day_number}};
 }
 function dateForWeek(year,week) {
     var base = new Date(year, 0, 1);

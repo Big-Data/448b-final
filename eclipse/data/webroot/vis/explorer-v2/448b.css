@@ -56,7 +56,7 @@
 	border-color:red !important;
 }
 
-#bars, #lines, #areas, #year, #month, #week, #page, #stacked, #countmode {
+#bars, #lines, #areas, #year, #month, #week, #dayofweek, #page, #stacked, #countmode {
 	background-repeat:no-repeat;
 	background-position:2px 2px;
 	padding-top:52px;
@@ -68,7 +68,7 @@
 	background-color:white;
 }
 
-#year, #month, #week, #page, #stacked, #countmode {
+#year, #month, #week, #dayofweek, #page, #stacked, #countmode {
 	background-size:50px 50px;
 }
 #countmode  {
@@ -95,6 +95,9 @@
 }
 #week {
 	background-image:url("img/wcal.png");
+}
+#dayofweek {
+	background-image:url("img/dwcal.png");
 }
 
 #page {

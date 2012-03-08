@@ -82,10 +82,13 @@ public abstract class BaseHitsAccessor {
 		return Pair.of(items, counts);
 	}
 	static final int COUNT_TRADEOFF = 8192;
-	//TODO: batching? maybe not; these ones cause the result sets to be large
+	static final int CHUNK_SIZE = 8192;
 	public Pair<int[], int[]> getCounts(int docs[]) throws SQLException {
 		if(docs.length == 0)
 			return Pair.of(new int[0], new int[0]);
+		if(docs.length > CHUNK_SIZE) {
+			return getCountsLarge(docs);
+		}
 		StringBuilder sb = new StringBuilder(docs.length * 16);
 		sb.append(bulkCountsQueryBase());
 		sb.append("(");
@@ -122,7 +125,34 @@ public abstract class BaseHitsAccessor {
 			return squishItems(all);
 		} finally {
 			rs.close();
+			st.close();
 		}
+	}
+	private Pair<int[], int[]> getCountsLarge(int docs[]) throws SQLException {
+		int[] all = new int[maxItemId() + 1];
+		for(int i = 0; i < docs.length;) {
+			StringBuilder sb = new StringBuilder(docs.length * 16);
+			sb.append(bulkCountsQueryBase());
+			sb.append("(");
+			sb.append(docs[i++]);
+			for(int j = 0; j < CHUNK_SIZE && i < docs.length; ++i, ++j) {
+				sb.append(",");
+				sb.append(docs[i]);
+			}
+			sb.append(")");
+			Statement st = SQL.forThread().createStatement();
+			ResultSet rs = st.executeQuery(sb.toString());
+			try {
+				while(rs.next()) {
+					Pair<int[], int[]> res = processRow(rs);
+					explodeItems(all, res.getKey(), res.getValue());
+				}
+			} finally {
+				rs.close();
+				st.close();
+			}
+		}
+		return squishItems(all);
 	}
 	public int updateHitList(int item, int items[], int counts[]) throws SQLException {
 		PreparedStatement st =updateQuery();

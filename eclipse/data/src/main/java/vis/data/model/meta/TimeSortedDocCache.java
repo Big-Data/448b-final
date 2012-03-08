@@ -1,10 +1,13 @@
 package vis.data.model.meta;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -72,5 +75,26 @@ public class TimeSortedDocCache {
 			pos1 = -(pos1 + 1);
 		
 		return ArrayUtils.subarray(id_, Math.min(pos0,  pos1), Math.max(pos0, pos1));
+	}
+	public int[] getDocsForDay(int day_of_week) {
+		TIntArrayList docs = new TIntArrayList(id_.length);
+		Calendar c = Calendar.getInstance();
+		int last_date = 0;
+		int last_day_of_week = -1;
+		for(int i = 0; i < id_.length; ++i) {
+			if(date_[i] != last_date) {
+				int day = date_[i] % 100;
+				int month = (date_[i] / 100) % 100 - 1;
+				int year = (date_[i]/ 10000);
+				c.set(year, month, day);
+				last_day_of_week = c.get(Calendar.DAY_OF_WEEK);
+				last_date = date_[i];
+			}
+			if(last_day_of_week == day_of_week) {
+				docs.add(id_[i]);
+			}
+			
+		}
+		return docs.toArray();
 	}
 }
